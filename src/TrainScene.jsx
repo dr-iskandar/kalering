@@ -63,7 +63,11 @@ function TrainCar({ kind, textureUrl, position, length = 4.1 }) {
 
   useEffect(() => {
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.flipY = false
+    // FBX UV coordinates expect the conventional Three.js texture orientation.
+    // Using flipY=false (GLTF-style) made the atlas appear on the wrong parts of
+    // the LRT, e.g. the face showing up on the roof.
+    texture.flipY = true
+    texture.anisotropy = 8
     texture.wrapS = THREE.ClampToEdgeWrapping
     texture.wrapT = THREE.ClampToEdgeWrapping
     texture.needsUpdate = true
@@ -135,6 +139,8 @@ function Landscape() {
   )
 }
 
+const TRAIN_RIDE_HEIGHT = 0.52
+
 function Train({ textureUrl, arrivalKey }) {
   const group = useRef()
   const start = useRef(performance.now())
@@ -153,7 +159,7 @@ function Train({ textureUrl, arrivalKey }) {
   })
 
   return (
-    <group ref={group} position={[-0.8, 0, 0]}>
+    <group ref={group} position={[-0.8, TRAIN_RIDE_HEIGHT, 0]}>
       <TrainCar kind="front" position={[-4.3, 0, 0]} length={4.6} />
       <TrainCar kind="wagon" textureUrl={textureUrl} position={[0.25, 0, 0]} length={4.25} />
       <TrainCar kind="wagon" textureUrl={textureUrl} position={[4.55, 0, 0]} length={4.25} />
@@ -175,7 +181,7 @@ function Scene({ textureUrl, arrivalKey }) {
         <Train textureUrl={textureUrl} arrivalKey={arrivalKey} />
       </Suspense>
       <Sparkles count={35} scale={[18, 8, 6]} size={4} speed={0.25} color="#ffe56c" position={[0, 4.5, 0]} />
-      <ContactShadows position={[0, -0.17, 0]} opacity={0.32} scale={24} blur={2.5} far={8} />
+      <ContactShadows position={[0, -0.08, 0]} opacity={0.3} scale={24} blur={2.7} far={9} />
       <OrbitControls
         target={[0, 1.7, 0]}
         enablePan={false}
